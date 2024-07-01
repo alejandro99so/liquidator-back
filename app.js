@@ -33,7 +33,6 @@ app.use(authMiddleware);
 connectDB()
   .then((client) => {
     console.log("Ready");
-    app.use("/login", require("./routes/api/login")());
     app.use("/user", require("./routes/api/user")());
     app.use("/room", require("./routes/api/room")());
     app.use("/chat", require("./routes/api/chat")());

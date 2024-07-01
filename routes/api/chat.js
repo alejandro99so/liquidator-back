@@ -6,6 +6,21 @@ const Trx = require("../../models/Trx");
 module.exports = () => {
   const router = express.Router();
 
+  router.get("/messages", async (req, res, next) => {
+    let _chat;
+    try {
+      _chat = await Chat.findOne({ trxId: req.query.trxId });
+
+    } catch (ex) {
+      console.log(ex.message);
+      res.json({ message: "CHAT_NOT_FOUND" });
+      return;
+    }
+    // req.query;
+    console.log({ query: req.query });
+    res.json({ chat: _chat });
+  });
+
   router.post("/create-message", async (req, res, next) => {
     const pusher = new PusherServer({
       appId: process.env.PUSHER_APP_ID,
@@ -35,6 +50,7 @@ module.exports = () => {
       res.json({ message: "ERROR_GETTING_MESSAGES" });
       return;
     }
+    console.log({ trx, body });
     if (!trx) {
       res.json({ message: "TRANSACTION_NOT_FOUND" });
       return;
@@ -43,6 +59,7 @@ module.exports = () => {
     let update;
     let type = "user";
     const timeUse = Math.floor(Date.now() / 1000);
+    console.log({ trx, body });
     if (trx.userAddress == body.from && trx.payerAddress == body.to) {
       update = {
         $push: {
@@ -71,7 +88,7 @@ module.exports = () => {
       _chat.messagePayer.push(body.message);
       _chat.messagePayerTime.push(timeUse);
     }
-    pusher.trigger("room-2", body.trxId, {
+    pusher.trigger("room-5", body.trxId, {
       chat: _chat,
     });
     res.json({ status: "sent", chat: _chat });
