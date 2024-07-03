@@ -1,3 +1,6 @@
 .env
 node_modules
 .vscode
+web3/artifacts
+web3/cache
+web3/typechain-types
