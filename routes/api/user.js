@@ -10,15 +10,16 @@ module.exports = () => {
       let user;
       try {
         user = await User.create(req.body);
-        console.log({ user });
       } catch (ex) {
+        console.log(ex);
         if (ex.code == 11000) {
-          res.send({ message: "USER_DUPLICATED" });
+          res.status(400).send({ message: "USER_DUPLICATED" });
           return;
         }
-        console.log(ex);
+        res.status(400).send({ message: "ERROR_CREATING_USER" });
+        return;
       }
-      res.send({ message: "USER_CREATED", id: user._id });
+      res.status(201).send({ message: "USER_CREATED", id: user._id });
     },
   ]);
 
@@ -27,15 +28,14 @@ module.exports = () => {
     try {
       const user = await User.findOne({ address: req.payload.address });
       if (!user) {
-        res.send({ message: "USER_NOT_FOUND" });
+        res.status(400).send({ message: "USER_NOT_FOUND" });
       } else {
-        res.send(user);
+        res.status(200).send(user);
       }
     } catch (ex) {
       console.log(ex);
-      res.send({ message: "USER_NOT_FOUND" });
+      res.status(400).send({ message: "ERROR_GETTING_USER" });
     }
-    return;
   });
 
   return router;

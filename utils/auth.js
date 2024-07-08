@@ -2,11 +2,16 @@ const { Web3 } = require("web3");
 const jose = require("jose");
 
 const authUser = async (authorization) => {
-  const jwt = authorization.split(" ")[1];
-  if (!jwt) return { error: true, message: "TOKEN_NOT_FOUND" };
-  const secret = new TextEncoder().encode(process.env.privateKey);
+  let jwt;
+  try {
+    jwt = authorization.split(" ")[1];
+    if (!jwt) return { error: true, message: "TOKEN_NOT_FOUND" };
+  } catch (ex) {
+    return { error: true, message: "ERROR_GETTING_TOKEN" };
+  }
   let payload;
   try {
+    const secret = new TextEncoder().encode(process.env.privateKey);
     const _token = await jose.jwtVerify(jwt, secret);
     payload = _token.payload;
   } catch (ex) {
@@ -30,7 +35,7 @@ const authUser = async (authorization) => {
       JSON.stringify(data),
       payload.signature
     );
-    if (signingAddress != payload.address) {
+    if (payload.address && signingAddress != payload.address) {
       return { error: true, message: "ADDRESS_NOT_SIGNER" };
     }
   } catch (ex) {

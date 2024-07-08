@@ -1,5 +1,4 @@
 const express = require("express");
-const User = require("../../models/User");
 const TrxReq = require("../../models/TrxReq");
 const TrxOffer = require("../../models/TrxOffer");
 const Trx = require("../../models/Trx");
@@ -34,7 +33,6 @@ module.exports = () => {
     const body = req.body;
     const network = networks.indexOf(body.network.toLowerCase()) + 1;
     const contract = contractsList[`${body.contract.toLowerCase()}${network}`];
-    console.log(body);
     const code = await codeToUse();
     let trx = {
       userAddress: req.payload.address,
@@ -58,8 +56,10 @@ module.exports = () => {
       console.log({ trxTemp });
     } catch (ex) {
       console.log(ex.message);
+      res.status(400).send({ message: "ERROR_CREATING_TRANSACTION_TEMP" });
+      return;
     }
-    res.send({
+    res.status(201).send({
       message: "REQUEST_ROOM_CREATED",
       id: trxTemp._id,
       code: trxTemp.code,
@@ -79,9 +79,10 @@ module.exports = () => {
       requests = await TrxReq.find(query);
     } catch (ex) {
       console.log(ex);
-      res.send({ error: "ERROR_GETTING_TRX" });
+      res.status(400).send({ error: "ERROR_GETTING_TRX" });
+      return;
     }
-    res.send(requests);
+    res.status(200).send(requests);
   });
 
   // confirm request room
@@ -94,10 +95,10 @@ module.exports = () => {
       );
     } catch (ex) {
       console.log(ex);
-      res.send({ message: "ERROR_CONFIRM_REQUEST" });
+      res.status(400).send({ message: "ERROR_CONFIRM_REQUEST" });
       return;
     }
-    res.send({ message: "TRANSACTION_CONFIRMED" });
+    res.status(200).send({ message: "TRANSACTION_CONFIRMED" });
   });
 
   // Create offer to room
@@ -111,11 +112,12 @@ module.exports = () => {
     let trxOffer;
     try {
       trxOffer = await TrxOffer.create(offer);
-      console.log({ trxOffer });
     } catch (ex) {
       console.log(ex.message);
+      res.status(400).send({ message: "ERROR_CREATING_OFFER_ROOM" });
+      return;
     }
-    res.send({ message: "OFFER_ROOM_CREATED", id: trxOffer._id });
+    res.status(201).send({ message: "OFFER_ROOM_CREATED", id: trxOffer._id });
   });
 
   // confirm room
@@ -143,7 +145,7 @@ module.exports = () => {
         };
       } catch (ex) {
         console.log(ex);
-        res.send({ message: "ERROR_GETTING_TRXS" });
+        res.status(400).send({ message: "ERROR_GETTING_TRXS" });
         return;
       }
     } else {
@@ -163,15 +165,35 @@ module.exports = () => {
         };
       } catch (ex) {
         console.log(ex);
-        res.send({ message: "ERROR_GETTING_TRXS" });
+        res.status(400).send({ message: "ERROR_GETTING_TRXS" });
         return;
       }
     }
+    let messages = {
+      user: trx.userAddress,
+      payer: trx.payerAddress,
+    };
+    const now = Math.floor(Date.now() / 1000);
     if (requestRoom.typeAccount == "qr") {
       trx.qr = requestRoom.qr;
+      messages.messageUser = [
+        requestRoom.qr,
+        `Mensaje: ${requestRoom.message}`,
+      ];
+      messages.messageUserTime = [now, now];
+      messages.messageUserType = ["qr", "text"];
     } else {
       trx.bankType = requestRoom.bankType;
       trx.bankNumber = requestRoom.bankNumber;
+      trx.bankName = requestRoom.bankName;
+      messages.messageUser = [
+        `Banco: ${requestRoom.bankName}`,
+        `Tipo de cuenta: ${requestRoom.bankType}`,
+        `Número de cuenta: ${requestRoom.bankNumber}`,
+        `Mensaje: ${requestRoom.message}`,
+      ];
+      messages.messageUserTime = [now, now, now, now];
+      messages.messageUserType = ["text", "text", "text", "text"];
     }
     let newTrx;
     try {
@@ -179,10 +201,19 @@ module.exports = () => {
       console.log(newTrx);
     } catch (ex) {
       console.log(ex.message);
-      res.send({ message: "ERROR_CREATING_TRX" });
+      res.status(400).send({ message: "ERROR_CREATING_TRX" });
       return;
     }
-    res.send({ message: "OFFER_ACEPTED", id: newTrx._id });
+    messages.trxId = newTrx._id;
+    // Send Messages
+    try {
+      await Chat.create(messages);
+    } catch (ex) {
+      console.log(ex.message);
+      res.status(400).json({ message: "ERROR_SAVING_MESSAGE" });
+      return;
+    }
+    res.status(200).send({ message: "OFFER_ACEPTED", id: newTrx._id });
   });
 
   // validate room activate
@@ -198,10 +229,10 @@ module.exports = () => {
       });
     } catch (ex) {
       console.log(ex.message);
-      res.send({ message: "ERROR_GETTING_TRXS" });
+      res.status(400).send({ message: "ERROR_GETTING_TRXS" });
       return;
     }
-    res.send({ trx });
+    res.status(200).send({ trx });
   });
 
   // Join room activated
@@ -215,10 +246,10 @@ module.exports = () => {
       );
     } catch (ex) {
       console.log(ex);
-      res.send({ error: "ERROR_GETTING_TRX" });
+      res.status(400).send({ error: "ERROR_GETTING_TRX" });
+      return;
     }
-    console.log(requests, req.payload.address);
-    res.send(requests);
+    res.status(200).send(requests);
   });
   return router;
 };

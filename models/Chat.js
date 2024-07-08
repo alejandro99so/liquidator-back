@@ -34,12 +34,20 @@ const ChatSchema = new mongoose.Schema(
       type: [Number],
       default: [],
     },
+    messageUserType: {
+      type: ["qr" | "text" | "image"],
+      default: [],
+    },
     messagePayer: {
       type: [String],
       default: [],
     },
     messagePayerTime: {
       type: [Number],
+      default: [],
+    },
+    messagePayerType: {
+      type: ["qr" | "text" | "image"],
       default: [],
     },
   },

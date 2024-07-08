@@ -46,6 +46,9 @@ let TrxReqSchema = new mongoose.Schema(
     qr: {
       type: String,
     },
+    bankName: {
+      type: String,
+    },
     bankType: {
       type: String,
     },

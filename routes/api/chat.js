@@ -7,21 +7,22 @@ module.exports = () => {
   const router = express.Router();
 
   router.get("/messages", async (req, res, next) => {
-    let _chat;
+    let chat;
     try {
-      _chat = await Chat.findOne({ trxId: req.query.trxId });
-
+      chat = await Chat.findOne({ trxId: req.query.trxId });
     } catch (ex) {
       console.log(ex.message);
-      res.json({ message: "CHAT_NOT_FOUND" });
+      res.status(400).json({ message: "CHAT_NOT_FOUND" });
       return;
     }
-    // req.query;
-    console.log({ query: req.query });
-    res.json({ chat: _chat });
+    res.status(200).json({ chat });
   });
 
-  router.post("/create-message", async (req, res, next) => {
+  router.post("/create-message", async (req, res) => {
+    const Steps = {
+      Users: "users",
+      UserLiquidator: "userLiquidator",
+    };
     const pusher = new PusherServer({
       appId: process.env.PUSHER_APP_ID,
       key: process.env.PUSHER_API_KEY,
@@ -29,42 +30,27 @@ module.exports = () => {
       cluster: process.env.PUSHER_CLUSTER,
     });
     const body = req.body;
-    // try {
-    //   await Chat.create({
-    //     trxId: body.trxId,
-    //     user: body.from,
-    //     payer: body.address,
-    //     messageUser: ["Hola!"],
-    //     messageUserTime: [Math.floor(Date.now() / 1000)],
-    //   });
-    // } catch (ex) {
-    //   console.log(ex.message);
-    //   res.json({ message: "ERROR_SAVING_MESSAGE" });
-    //   return;
-    // }
     let trx;
     try {
       trx = await Trx.findOne({ _id: body.trxId });
     } catch (ex) {
       console.log(ex.message);
-      res.json({ message: "ERROR_GETTING_MESSAGES" });
+      res.status(400).json({ message: "ERROR_GETTING_MESSAGES" });
       return;
     }
-    console.log({ trx, body });
     if (!trx) {
-      res.json({ message: "TRANSACTION_NOT_FOUND" });
+      res.status(400).json({ message: "TRANSACTION_NOT_FOUND" });
       return;
     }
-    console.log(trx);
     let update;
     let type = "user";
     const timeUse = Math.floor(Date.now() / 1000);
-    console.log({ trx, body });
     if (trx.userAddress == body.from && trx.payerAddress == body.to) {
       update = {
         $push: {
           messageUser: body.message,
           messageUserTime: timeUse,
+          messageUserType: body.type,
         },
       };
     } else if (trx.payerAddress == body.from && trx.userAddress == body.to) {
@@ -73,25 +59,34 @@ module.exports = () => {
         $push: {
           messagePayer: body.message,
           messagePayerTime: timeUse,
+          messagePayerType: body.type,
         },
       };
     } else {
-      res.json({ message: "USER_TRANSACTION_NOT_FOUND" });
+      res.status(400).json({ message: "USER_TRANSACTION_NOT_FOUND" });
       return;
     }
-    let _chat = await Chat.findOneAndUpdate({ trxId: body.trxId }, update);
-    console.log({ _chat });
+    let chat = await Chat.findOneAndUpdate({ trxId: body.trxId }, update);
     if (type == "user") {
-      _chat.messageUser.push(body.message);
-      _chat.messageUserTime.push(timeUse);
+      chat.messageUser.push(body.message);
+      chat.messageUserTime.push(timeUse);
+      chat.messageUserType.push(body.type);
     } else {
-      _chat.messagePayer.push(body.message);
-      _chat.messagePayerTime.push(timeUse);
+      chat.messagePayer.push(body.message);
+      chat.messagePayerTime.push(timeUse);
+      chat.messagePayerType.push(body.type);
     }
-    pusher.trigger("room-5", body.trxId, {
-      chat: _chat,
-    });
-    res.json({ status: "sent", chat: _chat });
+    let channel;
+    if (body.step == Steps.Users) {
+      channel = `${trx.code}_users`;
+    } else if (body.step == Steps.Users) {
+      channel = `${trx.code}_liquidator`;
+    } else {
+      res.status(400).json({ message: "STEP_NOT_IDENTIFIED" });
+      return;
+    }
+    pusher.trigger(channel, body.trxId, { chat });
+    res.status(200).json({ status: "sent", chat });
   });
 
   return router;

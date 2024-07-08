@@ -18,6 +18,14 @@ const UserSchema = new mongoose.Schema(
         "Address must start with 0x and be followed by 40 hexadecimal characters.",
       ],
     },
+    addressReceiver: {
+      type: String,
+      required: true,
+      match: [
+        addressRegex,
+        "Address must start with 0x and be followed by 40 hexadecimal characters.",
+      ],
+    },
     role: {
       type: String,
       required: true,

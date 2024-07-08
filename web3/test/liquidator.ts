@@ -182,5 +182,47 @@ describe("Liquidator", function () {
       await expect(await usdc.balanceOf(user5Address)).to.be.eq(500);
       await expect(await usdc.balanceOf(user2Address)).to.be.eq(1500);
     });
+
+    it("Should to create a transaction unsuccess with three users because one user didnt give permissions", async function () {
+      const { usdc, user1, user2, user4, user5, liquidator } =
+        await loadFixture(initState);
+      // permissions to liquidator to move 500 tokens usdc by user1
+      const amount = 500;
+      const liquidatorAddress = await liquidator.getAddress();
+      const user1Address = user1.address;
+      const user2Address = user2.address;
+      const user4Address = user4.address;
+      const user5Address = user5.address;
+      await usdc.connect(user1).approve(liquidatorAddress, amount);
+      await usdc.connect(user4).approve(liquidatorAddress, amount);
+      // allowance at the beginning
+      await expect(await usdc.allowance(user1Address, liquidator)).to.be.eq(
+        amount
+      );
+      await expect(await usdc.allowance(user4Address, liquidator)).to.be.eq(
+        amount
+      );
+      await expect(await usdc.allowance(user5Address, liquidator)).to.be.eq(0);
+      // Balance of users at the beginning
+      await expect(await usdc.balanceOf(user1Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user4Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user5Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user2Address)).to.be.eq(0);
+      // revert transaction by permissions denied for user5
+      await expect(
+        liquidator
+          .connect(user1)
+          .deposit(amount, user2Address, [
+            user1Address,
+            user4Address,
+            user5Address,
+          ])
+      ).to.be.revertedWithCustomError(usdc, "ERC20InsufficientAllowance");
+      // Balance of users at the end
+      await expect(await usdc.balanceOf(user1Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user4Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user5Address)).to.be.eq(1000);
+      await expect(await usdc.balanceOf(user2Address)).to.be.eq(0);
+    });
   });
 });

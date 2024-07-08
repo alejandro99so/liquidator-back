@@ -7,12 +7,13 @@ const validateAdmin = async (req, res, next) => {
       role: "ADMIN",
     });
     if (!admin) {
-      res.send({ message: "USER_NOT_ADMIN" });
+      res.status(401).send({ message: "USER_NOT_ADMIN" });
       return;
     }
-    console.log({ admin });
   } catch (ex) {
     console.log(ex);
+    res.status(401).send({ message: "USER_NOT_FOUND" });
+    return;
   }
   next();
 };

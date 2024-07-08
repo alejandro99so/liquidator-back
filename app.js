@@ -8,8 +8,11 @@ const { authUser } = require("./utils/auth");
 
 app.use(
   cors({
-    origin: "http://localhost:3001",
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    origin:
+      process.env.STAGE == "dev"
+        ? "http://localhost:3001"
+        : "http://localhost:3001",
+    methods: "GET,POST",
   })
 );
 
@@ -36,6 +39,7 @@ connectDB()
     app.use("/user", require("./routes/api/user")());
     app.use("/room", require("./routes/api/room")());
     app.use("/chat", require("./routes/api/chat")());
+    app.use("/contact", require("./routes/api/contact")());
   })
   .catch((err) => {
     console.error("Failed to connect to MongoDB", err);
