@@ -29,6 +29,10 @@ let TrxReqSchema = new mongoose.Schema(
         "Address must start with 0x and be followed by 40 hexadecimal characters.",
       ],
     },
+    cryptoCurrency: {
+      type: String,
+      required: true,
+    },
     usd: {
       type: Number,
       required: true,
@@ -66,6 +70,6 @@ let TrxReqSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-TrxReqSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
+// TrxReqSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
 
 module.exports = mongoose.model("TrxReq", TrxReqSchema);

@@ -33,19 +33,20 @@ const authMiddleware = async (req, res, next) => {
 
 app.use(authMiddleware);
 
-connectDB()
-  .then((client) => {
-    console.log("Ready");
+const initializeServer = async () => {
+  try {
+    await connectDB();
+    console.log("Connected to MongoDB");
     app.use("/user", require("./routes/api/user")());
     app.use("/room", require("./routes/api/room")());
     app.use("/chat", require("./routes/api/chat")());
     app.use("/contact", require("./routes/api/contact")());
-  })
-  .catch((err) => {
+    app.listen(port, () => {
+      console.log(`Server is running on port ${port}`);
+    });
+  } catch (err) {
     console.error("Failed to connect to MongoDB", err);
     process.exit(1);
-  });
-
-app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`);
-});
+  }
+};
+initializeServer();

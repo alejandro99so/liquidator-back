@@ -6,17 +6,16 @@ const { getCode } = require("../../utils/random");
 
 module.exports = () => {
   const router = express.Router();
-
-  const networks = [
-    "arbitrum",
-    "avalanche",
-    "base",
-    "ethereum",
-    "optimism",
-    "polygon",
-  ];
+  const networks = {
+    Base: 0,
+    Avalanche: 1,
+    Ethereum: 2,
+    Arbitrum: 3,
+    Polygon: 4,
+    Optimism: 5,
+  };
   const contractsList = {
-    usdc2: "0x5425890298aed601595a70AB815c96711a31Bc65",
+    usdc1: "0x5425890298aed601595a70AB815c96711a31Bc65",
   };
 
   const codeToUse = async () => {
@@ -31,7 +30,7 @@ module.exports = () => {
   // request room
   router.post("/request", async (req, res) => {
     const body = req.body;
-    const network = networks.indexOf(body.network.toLowerCase()) + 1;
+    const network = networks[body.network];
     const contract = contractsList[`${body.contract.toLowerCase()}${network}`];
     const code = await codeToUse();
     let trx = {
@@ -43,6 +42,7 @@ module.exports = () => {
       typeAccount: body.type,
       message: body.message,
       code,
+      cryptoCurrency: body.contract.toLowerCase(),
     };
     if (body.type.toLowerCase() == "qr") {
       trx.qr = body.qr;
