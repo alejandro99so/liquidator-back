@@ -11,9 +11,9 @@
   },
   "name": "back-liquidator",
   "version": "1.0.0",
-  "main": "app.js",
+  "main": "app.ts",
   "scripts": {
-    "start": "node app.js",
+    "start": "bun app.ts",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
