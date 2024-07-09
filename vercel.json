@@ -1,9 +1,16 @@
 {
   "version": 2,
+  "builds": [
+    {
+      "src": "app.ts",
+      "use": "@vercel/node",
+      "config": { "distDir": "dist" }
+    }
+  ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "app.js"
+      "dest": "/dist/app.js"
     }
   ]
 }
