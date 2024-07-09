@@ -1,22 +1,17 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
-let TrxSchema = new mongoose.Schema(
+let TrxReqSchema = new mongoose.Schema(
   {
     userAddress: {
       type: String,
       required: true,
     },
-
     message: {
       type: String,
     },
     code: {
-      type: String,
-      required: true,
-    },
-    payerAddress: {
       type: String,
       required: true,
     },
@@ -33,6 +28,10 @@ let TrxSchema = new mongoose.Schema(
         addressRegex,
         "Address must start with 0x and be followed by 40 hexadecimal characters.",
       ],
+    },
+    cryptoCurrency: {
+      type: String,
+      required: true,
     },
     usd: {
       type: Number,
@@ -60,21 +59,9 @@ let TrxSchema = new mongoose.Schema(
     bankNumber: {
       type: String,
     },
-    status: {
-      type: String,
-      required: true,
-      enum: [
-        "INPROGRESS",
-        "INCOMPLETE",
-        "STARTED",
-        "PAYED",
-        "REJECTED",
-        "FINISHED",
-      ],
-      default: "INPROGRESS",
-    },
-    payedAt: {
-      type: Date,
+    isActive: {
+      type: Boolean,
+      default: false,
     },
     friends: {
       type: [String],
@@ -83,11 +70,6 @@ let TrxSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+// TrxReqSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
 
-module.exports = mongoose.model("Trx", TrxSchema);
-// INPROGRESS: crypto has to be sent to sc
-// INCOMPLETE: crypto never was sent
-// STARTED: Payment in fiat has to be done
-// PAYED: Bill payed
-// REJECTED: Payment in fiat was not done
-// FINISHED: Crypto was given to payer
+export default mongoose.model("TrxReq", TrxReqSchema);

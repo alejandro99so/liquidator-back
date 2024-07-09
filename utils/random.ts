@@ -1,4 +1,4 @@
-const getCode = (length) => {
+const getCode = (length: number) => {
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
   let result = "";
   const charactersLength = characters.length;
@@ -8,4 +8,4 @@ const getCode = (length) => {
   return result;
 };
 
-module.exports = { getCode };
+export default getCode;

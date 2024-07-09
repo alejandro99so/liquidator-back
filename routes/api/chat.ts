@@ -1,16 +1,16 @@
-const express = require("express");
-const PusherServer = require("pusher");
-const Chat = require("../../models/Chat");
-const Trx = require("../../models/Trx");
+import express, { Request, Response } from "express";
+import PusherServer from "pusher";
+import Chat from "../../models/Chat";
+import Trx from "../../models/Trx";
 
-module.exports = () => {
+const apiChat = () => {
   const router = express.Router();
 
-  router.get("/messages", async (req, res, next) => {
+  router.get("/messages", async (req: Request, res: Response) => {
     let chat;
     try {
       chat = await Chat.findOne({ trxId: req.query.trxId });
-    } catch (ex) {
+    } catch (ex: any) {
       console.log(ex.message);
       res.status(400).json({ message: "CHAT_NOT_FOUND" });
       return;
@@ -18,22 +18,22 @@ module.exports = () => {
     res.status(200).json({ chat });
   });
 
-  router.post("/create-message", async (req, res) => {
+  router.post("/create-message", async (req: Request, res: Response) => {
     const Steps = {
       Users: "users",
       UserLiquidator: "userLiquidator",
     };
     const pusher = new PusherServer({
-      appId: process.env.PUSHER_APP_ID,
-      key: process.env.PUSHER_API_KEY,
-      secret: process.env.PUSHER_SECRET,
-      cluster: process.env.PUSHER_CLUSTER,
+      appId: String(process.env.PUSHER_APP_ID),
+      key: String(process.env.PUSHER_API_KEY),
+      secret: String(process.env.PUSHER_SECRET),
+      cluster: String(process.env.PUSHER_CLUSTER),
     });
     const body = req.body;
     let trx;
     try {
       trx = await Trx.findOne({ _id: body.trxId });
-    } catch (ex) {
+    } catch (ex: any) {
       console.log(ex.message);
       res.status(400).json({ message: "ERROR_GETTING_MESSAGES" });
       return;
@@ -67,6 +67,10 @@ module.exports = () => {
       return;
     }
     let chat = await Chat.findOneAndUpdate({ trxId: body.trxId }, update);
+    if (!chat) {
+      res.status(400).json({ message: "CHAT_NOT_FOUND" });
+      return;
+    }
     if (type == "user") {
       chat.messageUser.push(body.message);
       chat.messageUserTime.push(timeUse);
@@ -91,3 +95,5 @@ module.exports = () => {
 
   return router;
 };
+
+export default apiChat;

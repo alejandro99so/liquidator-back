@@ -1,6 +1,4 @@
-const mongoose = require("mongoose");
-
-const addressRegex = /^0x[a-fA-F0-9]{40}$/;
+import mongoose from "mongoose";
 
 let TrxOfferSchema = new mongoose.Schema(
   {
@@ -21,4 +19,4 @@ let TrxOfferSchema = new mongoose.Schema(
 );
 TrxOfferSchema.index({ createdAt: 1 }, { expireAfterSeconds: 300 });
 
-module.exports = mongoose.model("TrxOffer", TrxOfferSchema);
+export default mongoose.model("TrxOffer", TrxOfferSchema);

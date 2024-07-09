@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
 
-const emailValidator = (email) => {
+const emailValidator = (email: string) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
@@ -29,4 +29,4 @@ const ContactSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Contact", ContactSchema);
+export default mongoose.model("Contact", ContactSchema);

@@ -1,11 +1,12 @@
-const express = require("express");
-const Contact = require("../../models/Contact");
-const { validateAdmin } = require("../../utils/admin");
+import express, { Request, Response } from "express";
+import Contact from "../../models/Contact";
+import validateAdmin from "../../utils/admin";
+import { authMiddleware } from "../../app";
 
-module.exports = () => {
+const contact = () => {
   const router = express.Router();
   // Create contacts request
-  router.post("/", async (req, res) => {
+  router.post("/", async (req: Request, res: Response) => {
     let contact;
     try {
       contact = await Contact.create(req.body);
@@ -19,8 +20,9 @@ module.exports = () => {
 
   // Get contacts request
   router.get("/", [
+    authMiddleware,
     validateAdmin,
-    async (req, res) => {
+    async (req: Request, res: Response) => {
       try {
         const contacts = await Contact.find({});
         if (!contacts) {
@@ -33,7 +35,9 @@ module.exports = () => {
         res.status(400).send({ message: "ERROR_GETTING_CONTACTS_REQUESTS" });
       }
     },
-  ]);
+  ] as any);
 
   return router;
 };
+
+export default contact;

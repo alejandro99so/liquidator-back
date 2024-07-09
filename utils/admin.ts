@@ -1,6 +1,14 @@
-const User = require("../models/User");
+import User from "../models/User";
+import { Request, Response, NextFunction } from "express";
+import { IPayload } from "../types";
 
-const validateAdmin = async (req, res, next) => {
+const validateAdmin = async (
+  req: Request & {
+    payload: IPayload;
+  },
+  res: Response,
+  next: NextFunction
+) => {
   try {
     const admin = await User.findOne({
       address: req.payload.address,
@@ -18,4 +26,4 @@ const validateAdmin = async (req, res, next) => {
   next();
 };
 
-module.exports = { validateAdmin };
+export default validateAdmin;

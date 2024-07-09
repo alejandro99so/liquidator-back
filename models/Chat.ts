@@ -1,5 +1,4 @@
-const mongoose = require("mongoose");
-
+import mongoose from "mongoose";
 const addressRegex = /^0x[a-fA-F0-9]{40}$/;
 
 const ChatSchema = new mongoose.Schema(
@@ -35,7 +34,8 @@ const ChatSchema = new mongoose.Schema(
       default: [],
     },
     messageUserType: {
-      type: ["qr" | "text" | "image"],
+      type: [String],
+      enum: ["qr", "text", "image"],
       default: [],
     },
     messagePayer: {
@@ -47,11 +47,12 @@ const ChatSchema = new mongoose.Schema(
       default: [],
     },
     messagePayerType: {
-      type: ["qr" | "text" | "image"],
+      type: [String],
+      enum: ["qr", "text", "image"],
       default: [],
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("Chat", ChatSchema);
+export default mongoose.model("Chat", ChatSchema);
