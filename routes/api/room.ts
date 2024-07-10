@@ -129,6 +129,7 @@ const room = () => {
     try {
       requests = await TrxReq.find(query, {
         network: true,
+        userAddress: true,
         cryptoCurrency: true,
         usd: true,
         cop: true,
