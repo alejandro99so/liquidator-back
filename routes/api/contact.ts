@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import Contact from "../../models/Contact";
 import validateAdmin from "../../utils/admin";
-import { authMiddleware } from "../../app";
+import { authMiddleware } from "../../src/app";
 
 const contact = () => {
   const router = express.Router();

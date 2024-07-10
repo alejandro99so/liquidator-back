@@ -4,13 +4,13 @@ import cors from "cors";
 const port = 3000;
 import dotenv from "dotenv";
 dotenv.config();
-import connectDB from "./config/db";
-import authUser from "./utils/auth";
-import { IPayload } from "./types";
-import UserApi from "./routes/api/user";
-import RoomApi from "./routes/api/room";
-import ContactApi from "./routes/api/contact";
-import ChatApi from "./routes/api/chat";
+import connectDB from "../config/db";
+import authUser from "../utils/auth";
+import { IPayload } from "../types";
+import UserApi from "../routes/api/user";
+import RoomApi from "../routes/api/room";
+import ContactApi from "../routes/api/contact";
+import ChatApi from "../routes/api/chat";
 
 app.use(
   cors({
@@ -59,12 +59,14 @@ const initializeServer = async () => {
     app.use("/user", UserApi());
     app.use("/room", RoomApi());
     app.use("/chat", ChatApi());
-    app.listen(port, () => {
-      console.log(`Server is running on port ${port}`);
-    });
+    // app.listen(port, () => {
+    //   console.log(`Server is running on port ${port}`);
+    // });
   } catch (err) {
     console.error("Failed to connect to MongoDB", err);
     process.exit(1);
   }
 };
 initializeServer();
+
+export default app;
