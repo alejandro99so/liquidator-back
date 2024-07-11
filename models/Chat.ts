@@ -7,10 +7,13 @@ const ChatSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
+    code: {
+      type: String,
+      required: true,
+    },
     user: {
       type: String,
       required: true,
-      unique: true,
       match: [
         addressRegex,
         "Address must start with 0x and be followed by 40 hexadecimal characters.",
@@ -19,7 +22,6 @@ const ChatSchema = new mongoose.Schema(
     payer: {
       type: String,
       required: true,
-      unique: true,
       match: [
         addressRegex,
         "Address must start with 0x and be followed by 40 hexadecimal characters.",
@@ -35,7 +37,7 @@ const ChatSchema = new mongoose.Schema(
     },
     messageUserType: {
       type: [String],
-      enum: ["qr", "text", "image"],
+      enum: ["qr", "message", "image"],
       default: [],
     },
     messagePayer: {
@@ -50,6 +52,10 @@ const ChatSchema = new mongoose.Schema(
       type: [String],
       enum: ["qr", "text", "image"],
       default: [],
+    },
+    active: {
+      type: [Boolean],
+      default: false,
     },
   },
   { timestamps: true }

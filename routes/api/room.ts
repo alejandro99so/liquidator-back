@@ -30,6 +30,7 @@ type IMessage = {
   payer: string;
   messageUser: string[];
   messageUserTime: number[];
+  code: string;
   messageUserType: ("qr" | "message" | "image")[];
 };
 
@@ -288,6 +289,7 @@ const room = () => {
         trxId: "",
         user: trx.userAddress,
         payer: String(trx.payerAddress),
+        code: String(trx.code),
         messageUser: [],
         messageUserTime: [],
         messageUserType: [],
@@ -326,6 +328,7 @@ const room = () => {
       messages.trxId = String(newTrx._id);
       // Send Messages
       try {
+        console.log({ messages });
         await Chat.create(messages);
       } catch (ex: any) {
         console.log(ex.message);
@@ -385,6 +388,35 @@ const room = () => {
         return;
       }
       res.status(200).send(requests);
+    }
+  );
+
+  // Confirm payment by user
+  router.patch(
+    "/confirm",
+    async (
+      req: Request & {
+        payload?: IPayload;
+      },
+      res: Response
+    ) => {
+      const address = req.payload?.address;
+      let trx;
+      try {
+        trx = await Trx.findOneAndUpdate(
+          {
+            payerAddress: req.payload?.address,
+            status: "INPROGRESS",
+          },
+          { status: "STARTED" }
+        );
+      } catch (ex: any) {
+        console.log({ error: ex.message });
+        res.status(400).send({ message: "ERROR_GETTING_TRANSACTION" });
+        return;
+      }
+      console.log({ address });
+      res.status(200).send(trx);
     }
   );
   return router;
