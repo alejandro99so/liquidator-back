@@ -31,6 +31,7 @@ type IMessage = {
   messageUser: string[];
   messageUserTime: number[];
   code: string;
+  active: boolean;
   messageUserType: ("qr" | "message" | "image")[];
 };
 
@@ -290,6 +291,7 @@ const room = () => {
         user: trx.userAddress,
         payer: String(trx.payerAddress),
         code: String(trx.code),
+        active: true,
         messageUser: [],
         messageUserTime: [],
         messageUserType: [],

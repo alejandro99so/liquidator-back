@@ -19,7 +19,7 @@ app.use(
       process.env.STAGE == "dev"
         ? "http://localhost:3001"
         : "http://localhost:3001",
-    methods: "GET,POST",
+    methods: "GET,POST,PATCH",
   })
 );
 

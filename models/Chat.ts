@@ -54,7 +54,7 @@ const ChatSchema = new mongoose.Schema(
       default: [],
     },
     active: {
-      type: [Boolean],
+      type: Boolean,
       default: false,
     },
   },
