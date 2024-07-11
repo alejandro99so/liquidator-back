@@ -11,6 +11,7 @@ import UserApi from "../routes/api/user";
 import RoomApi from "../routes/api/room";
 import ContactApi from "../routes/api/contact";
 import ChatApi from "../routes/api/chat";
+import CoinmarketcapApi from "../routes/api/coinmarketcap";
 
 app.use(
   cors({
@@ -55,6 +56,8 @@ const initializeServer = async () => {
     await connectDB();
     console.log("Connected to MongoDB");
     app.use("/contact", ContactApi());
+    console.log("here app");
+    app.use("/coinmarketcap", CoinmarketcapApi());
     app.use(authMiddleware);
     app.use("/user", UserApi());
     app.use("/room", RoomApi());
