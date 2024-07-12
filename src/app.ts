@@ -12,7 +12,11 @@ import RoomApi from "../routes/api/room";
 import ContactApi from "../routes/api/contact";
 import ChatApi from "../routes/api/chat";
 import CoinmarketcapApi from "../routes/api/coinmarketcap";
-const whitelist = ["https://buckspay.xyz", "https://app.buckspay.xyz"];
+const whitelist = [
+  "https://buckspay.xyz",
+  "https://www.buckspay.xyz",
+  "https://app.buckspay.xyz",
+];
 const whitelistDev = ["http://localhost:3001", "http://localhost:3002"];
 app.use(
   cors({
