@@ -56,7 +56,6 @@ const apiChat = () => {
       });
       const body = req.body;
       let trx;
-      console.log({ body });
       try {
         trx = await Trx.findOne({
           _id: body.step == Steps.EventLiquidator ? body.trxIdNew : body.trxId,
@@ -145,6 +144,35 @@ const apiChat = () => {
       }
       pusher.trigger(channel, body.trxId, message);
       res.status(200).json({ status: "sent", message });
+    }
+  );
+
+  router.patch(
+    "",
+    async (
+      req: Request & {
+        payload?: IPayload;
+      },
+      res: Response
+    ) => {
+      let _chat;
+      try {
+        _chat = await Chat.findOneAndUpdate(
+          {
+            active: true,
+            $or: [
+              { user: req.payload?.address },
+              { payer: req.payload?.address },
+            ],
+          },
+          { active: false }
+        );
+      } catch (ex: any) {
+        console.log(ex.message);
+        res.status(400).json({ message: "CHAT_NOT_FOUND" });
+        return;
+      }
+      res.status(200).json(_chat);
     }
   );
 

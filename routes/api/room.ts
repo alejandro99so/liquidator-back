@@ -403,22 +403,56 @@ const room = () => {
       res: Response
     ) => {
       const address = req.payload?.address;
+      const { status } = req.query;
+      const listStatus = ["STARTED", "PAYED", "FINISHED"];
+      const listStatusBefore = ["INPROGRESS", "STARTED", "PAYED"];
       let trx;
+      if (!listStatus.includes(String(status))) {
+        res.status(400).send({ message: "STATUS_NOT_FOUND" });
+        return;
+      }
       try {
         trx = await Trx.findOneAndUpdate(
           {
-            payerAddress: req.payload?.address,
-            status: "INPROGRESS",
+            $or: [{ userAddress: address }, { payerAddress: address }],
+            status: listStatusBefore[listStatus.indexOf(String(status))],
           },
-          { status: "STARTED" }
+          { status }
         );
       } catch (ex: any) {
         console.log({ error: ex.message });
         res.status(400).send({ message: "ERROR_GETTING_TRANSACTION" });
         return;
       }
-      console.log({ address });
       res.status(200).send(trx);
+    }
+  );
+
+  router.get(
+    "/:id",
+    async (
+      req: Request & {
+        payload?: IPayload;
+      },
+      res: Response
+    ) => {
+      const { id } = req.params;
+      let _trx;
+      try {
+        _trx = await Trx.findOne({
+          _id: id,
+          $or: [
+            { userAddress: req.payload?.address },
+            { payerAddress: req.payload?.address },
+          ],
+        });
+      } catch (ex: any) {
+        console.log(ex.message);
+        res.status(400).send({ message: "ERROR_GETTING_TRXS" });
+        return;
+      }
+      console.log({ id, _trx });
+      res.status(200).send(_trx);
     }
   );
   return router;
