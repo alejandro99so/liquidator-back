@@ -12,13 +12,23 @@ import RoomApi from "../routes/api/room";
 import ContactApi from "../routes/api/contact";
 import ChatApi from "../routes/api/chat";
 import CoinmarketcapApi from "../routes/api/coinmarketcap";
-
+const whitelist = ["https://buckspay.xyz", "https://app.buckspay.xyz"];
+const whitelistDev = ["http://localhost:3001", "http://localhost:3002"];
 app.use(
   cors({
-    origin:
-      process.env.STAGE == "dev"
-        ? "http://localhost:3001"
-        : "http://localhost:3001",
+    origin: function (origin, callback) {
+      console.log({ origin });
+      if (
+        (process.env.STAGE == "dev" ? whitelistDev : whitelist).indexOf(
+          String(origin)
+        ) !== -1 ||
+        !origin
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     methods: "GET,POST,PATCH",
   })
 );
